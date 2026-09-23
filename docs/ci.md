@@ -26,6 +26,12 @@ Unit runs before the browser install so a typecheck or logic failure fails fast 
 - `concurrency` cancels an older run of the same PR when a new push lands.
 - The job must stay green on `main`; a red base is handled per CLAUDE.md rule 4 (fix with tests), never by skipping a step.
 
-## Branch protection (manual, not in this repo)
+## Branch protection (configured in repository settings)
 
-Once this workflow has run once, mark `check` as a required status check on `main` in the repository settings so `pull_request` cannot merge red.
+`main` is protected by the ruleset `main-protection` (set 2026-09-23, outside this repo because the API path is not writable from agent sessions):
+
+- Pull request required before merging, 0 approvals.
+- Required status check `typecheck + tests`, branch must be up to date.
+- Force pushes blocked, deletion restricted, no bypass list.
+
+Changing any of these is a repository-settings change by a human. Update this section in the same PR that motivates the change.
