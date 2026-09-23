@@ -26,6 +26,14 @@ Unit runs before the browser install so a typecheck or logic failure fails fast 
 - `concurrency` cancels an older run of the same PR when a new push lands.
 - The job must stay green on `main`; a red base is handled per CLAUDE.md rule 4 (fix with tests), never by skipping a step.
 
-## Branch protection (manual, not in this repo)
+## Branch protection (repository settings)
 
-Once this workflow has run once, mark `check` as a required status check on `main` in the repository settings so `pull_request` cannot merge red.
+A ruleset `main-protection` exists for `main` (created 2026-09-23 in repository settings, because the API path is not writable from agent sessions):
+
+- Pull request required before merging, 0 approvals.
+- Required status check `typecheck + tests`, branch must be up to date.
+- Force pushes blocked, deletion restricted, no bypass list.
+
+**It is not enforced today.** The repository is private on GitHub Free, and GitHub only enforces rulesets and branch protection on private repositories under Pro, Team or Enterprise. Verified on PR #5: while `typecheck + tests` was still running, the PR reported `mergeable_state: unstable` (mergeable) instead of `blocked`, and the rules API answered "Upgrade to GitHub Pro or make this repository public".
+
+Until the plan or visibility changes, the gate is convention: never merge a PR whose `typecheck + tests` is not green.
