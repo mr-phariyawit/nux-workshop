@@ -28,12 +28,20 @@ Unit runs before the browser install so a typecheck or logic failure fails fast 
 
 ## Branch protection (repository settings)
 
-A ruleset `main-protection` exists for `main` (created 2026-09-23 in repository settings, because the API path is not writable from agent sessions):
+Intended ruleset `main-protection` for `main` (to be created in repository settings, because the API path is not writable from agent sessions):
 
 - Pull request required before merging, 0 approvals.
 - Required status check `typecheck + tests`, branch must be up to date.
 - Force pushes blocked, deletion restricted, no bypass list.
 
-**It is not enforced today.** The repository is private on GitHub Free, and GitHub only enforces rulesets and branch protection on private repositories under Pro, Team or Enterprise. Verified on PR #5: while `typecheck + tests` was still running, the PR reported `mergeable_state: unstable` (mergeable) instead of `blocked`, and the rules API answered "Upgrade to GitHub Pro or make this repository public".
+**Status: not enforced (re-verified 2026-09-23 on PR #6).** The repository is now public, so the plan restriction no longer applies, but:
 
-Until the plan or visibility changes, the gate is convention: never merge a PR whose `typecheck + tests` is not green.
+- `GET /repos/{owner}/{repo}/rulesets` returns an empty list: no ruleset is saved on the repository.
+- `GET /repos/{owner}/{repo}/rules/branches/main` returns an empty list: no rule applies to `main`.
+- PR #6 reported `mergeable_state: unstable` (mergeable) while `typecheck + tests` was still queued. An enforced required check would report `blocked`.
+
+Re-checked after the owner reported creating the ruleset: the rulesets and branch-rules APIs still return empty lists.
+
+Likely cause: the ruleset was never saved, or it was saved with Enforcement "Disabled". Create it again (Settings → Rules → Rulesets → New branch ruleset) with Enforcement **Active**, then re-run this check.
+
+Until enforcement is verified, the gate is convention: never merge a PR whose `typecheck + tests` is not green.
