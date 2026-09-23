@@ -73,3 +73,6 @@ _aegis-backup-*/
 *secret*
 credentials.*
 # <<< AEGIS Framework <<<
+
+# Node
+node_modules/
