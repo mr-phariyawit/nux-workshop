@@ -40,6 +40,8 @@ Intended ruleset `main-protection` for `main` (to be created in repository setti
 - `GET /repos/{owner}/{repo}/rules/branches/main` returns an empty list: no rule applies to `main`.
 - PR #6 reported `mergeable_state: unstable` (mergeable) while `typecheck + tests` was still queued. An enforced required check would report `blocked`.
 
+Re-checked after the owner reported creating the ruleset: the rulesets and branch-rules APIs still return empty lists.
+
 Likely cause: the ruleset was never saved, or it was saved with Enforcement "Disabled". Create it again (Settings → Rules → Rulesets → New branch ruleset) with Enforcement **Active**, then re-run this check.
 
 Until enforcement is verified, the gate is convention: never merge a PR whose `typecheck + tests` is not green.
