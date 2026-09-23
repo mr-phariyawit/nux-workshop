@@ -34,6 +34,12 @@ A ruleset `main-protection` exists for `main` (created 2026-09-23 in repository 
 - Required status check `typecheck + tests`, branch must be up to date.
 - Force pushes blocked, deletion restricted, no bypass list.
 
-**Status:** the repository was made public on 2026-09-23, which lifts the GitHub Free restriction. Enforcement is re-verified by PR #6 (see below).
+**Status: not enforced (re-verified 2026-09-23 on PR #6).** The repository is now public, so the plan restriction no longer applies, but:
+
+- `GET /repos/{owner}/{repo}/rulesets` returns an empty list: no ruleset is saved on the repository.
+- `GET /repos/{owner}/{repo}/rules/branches/main` returns an empty list: no rule applies to `main`.
+- PR #6 reported `mergeable_state: unstable` (mergeable) while `typecheck + tests` was still queued. An enforced required check would report `blocked`.
+
+Likely cause: the ruleset was never saved, or it was saved with Enforcement "Disabled". Create it again (Settings → Rules → Rulesets → New branch ruleset) with Enforcement **Active**, then re-run this check.
 
 Until enforcement is verified, the gate is convention: never merge a PR whose `typecheck + tests` is not green.
