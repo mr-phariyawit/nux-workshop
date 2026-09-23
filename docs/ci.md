@@ -34,6 +34,6 @@ A ruleset `main-protection` exists for `main` (created 2026-09-23 in repository 
 - Required status check `typecheck + tests`, branch must be up to date.
 - Force pushes blocked, deletion restricted, no bypass list.
 
-**It is not enforced today.** The repository is private on GitHub Free, and GitHub only enforces rulesets and branch protection on private repositories under Pro, Team or Enterprise. Verified on PR #5: while `typecheck + tests` was still running, the PR reported `mergeable_state: unstable` (mergeable) instead of `blocked`, and the rules API answered "Upgrade to GitHub Pro or make this repository public".
+**Status:** the repository was made public on 2026-09-23, which lifts the GitHub Free restriction. Enforcement is re-verified by PR #6 (see below).
 
-Until the plan or visibility changes, the gate is convention: never merge a PR whose `typecheck + tests` is not green.
+Until enforcement is verified, the gate is convention: never merge a PR whose `typecheck + tests` is not green.
