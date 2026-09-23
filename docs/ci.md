@@ -28,7 +28,7 @@ Unit runs before the browser install so a typecheck or logic failure fails fast 
 
 ## Branch protection (repository settings)
 
-A ruleset `main-protection` exists for `main` (created 2026-09-23 in repository settings, because the API path is not writable from agent sessions):
+Intended ruleset `main-protection` for `main` (to be created in repository settings, because the API path is not writable from agent sessions):
 
 - Pull request required before merging, 0 approvals.
 - Required status check `typecheck + tests`, branch must be up to date.
