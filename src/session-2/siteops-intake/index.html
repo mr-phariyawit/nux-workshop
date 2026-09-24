@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SiteOps Intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&display=swap">
+<style>
+/* Tokens: DESIGN.md v1.2 §2.2, §3–§5. Dashboard surface is light by default; dark follows the OS or data-theme. */
+:root {
+  color-scheme: light;
+  --color-bg-canvas: #F6F8FA;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-surface-raised: #FFFFFF;
+  --color-fg-primary: #141C26;
+  --color-fg-secondary: #4F5E70;
+  --color-border: #D2DBE4;
+  --color-border-strong: #8A98A8;
+  --color-primary: #0B6F71;
+  --color-primary-hover: #085456;
+  --color-on-primary: #FFFFFF;
+  --color-status-p1: #D63C3C;
+  --color-status-p2: #BD7708;
+  --color-status-p3: #2F6FD6;
+  --color-status-done: #1E9E5A;
+  --color-on-status-p1: #FFFFFF;
+  --color-on-status-p2: #141C26;
+  --color-on-status-p3: #FFFFFF;
+  --color-on-status-done: #141C26;
+  --color-focus-ring: #0B6F71;
+  --shadow-1: 0 1px 2px rgb(11 16 23 / .08);
+  --shadow-2: 0 4px 12px rgb(11 16 23 / .12);
+  --scrim: rgb(11 16 23 / .45);
+
+  --font-sans: "Noto Sans Thai", "Inter", system-ui, sans-serif;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px;
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px; --radius-full: 9999px;
+  --target-md: 44px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-bg-canvas: #0B1017;
+    --color-bg-surface: #141C26;
+    --color-bg-surface-raised: #22303F;
+    --color-fg-primary: #F6F8FA;
+    --color-fg-secondary: #D2DBE4;
+    --color-border: #22303F;
+    --color-border-strong: #4F5E70;
+    --color-primary: #6FCBCB;
+    --color-primary-hover: #0F8B8D;
+    --color-on-primary: #0B1017;
+    --color-status-p1: #F08A8A;
+    --color-status-p2: #F5C56B;
+    --color-status-p3: #8DB4F2;
+    --color-status-done: #7BD5A2;
+    --color-on-status-p1: #0B1017;
+    --color-on-status-p2: #0B1017;
+    --color-on-status-p3: #0B1017;
+    --color-on-status-done: #0B1017;
+    --color-focus-ring: #6FCBCB;
+    --shadow-1: none;
+    --shadow-2: 0 4px 12px rgb(0 0 0 / .45);
+    --scrim: rgb(0 0 0 / .6);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg-canvas: #0B1017;
+  --color-bg-surface: #141C26;
+  --color-bg-surface-raised: #22303F;
+  --color-fg-primary: #F6F8FA;
+  --color-fg-secondary: #D2DBE4;
+  --color-border: #22303F;
+  --color-border-strong: #4F5E70;
+  --color-primary: #6FCBCB;
+  --color-primary-hover: #0F8B8D;
+  --color-on-primary: #0B1017;
+  --color-status-p1: #F08A8A;
+  --color-status-p2: #F5C56B;
+  --color-status-p3: #8DB4F2;
+  --color-status-done: #7BD5A2;
+  --color-on-status-p1: #0B1017;
+  --color-on-status-p2: #0B1017;
+  --color-on-status-p3: #0B1017;
+  --color-on-status-done: #0B1017;
+  --color-focus-ring: #6FCBCB;
+  --shadow-1: none;
+  --shadow-2: 0 4px 12px rgb(0 0 0 / .45);
+  --scrim: rgb(0 0 0 / .6);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 16px; line-height: 1.5;
+  background: var(--color-bg-canvas);
+  color: var(--color-fg-primary);
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.ico { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ico-sm { width: 16px; height: 16px; }
+.en { font-size: 14px; font-weight: 400; color: var(--color-fg-secondary); }
+
+/* Demo controls: not part of the product surface */
+.demo {
+  display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; justify-content: center;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px dashed var(--color-border-strong);
+  font-size: 14px; color: var(--color-fg-secondary);
+}
+.demo strong { font-weight: 600; margin-right: var(--space-1); }
+.demo button {
+  min-height: var(--target-md); padding: 0 var(--space-3);
+  border: 1px solid var(--color-border-strong); border-radius: var(--radius-full);
+  background: transparent; cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-2);
+}
+.demo button[aria-pressed="true"] { background: var(--color-bg-canvas); border-color: var(--color-primary); }
+
+/* Page */
+.page { max-width: 1600px; margin: 0 auto; padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-6); }
+.pagehead { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-3); }
+h1 { font-size: 22px; line-height: 30px; font-weight: 600; margin: 0; }
+h1 .en { display: block; }
+.sync-line { font-size: 14px; line-height: 20px; color: var(--color-fg-secondary); display: flex; align-items: center; gap: var(--space-2); margin: 0; }
+h2 { font-size: 18px; line-height: 26px; font-weight: 600; margin: 0; }
+
+/* SlaAlertBanner (proposed, DESIGN.md §6) */
+#alerts:empty { display: none; }
+#alerts { display: flex; flex-direction: column; gap: var(--space-2); }
+.alert-banner {
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  padding: var(--space-3) var(--space-4); border-radius: var(--radius-md);
+  background: var(--color-bg-surface); border: 2px solid var(--color-status-p1); box-shadow: var(--shadow-1);
+}
+.alert-banner > .ico { color: var(--color-status-p1); margin-top: 2px; }
+.alert-banner p { margin: 0; }
+.alert-banner .next { font-size: 14px; color: var(--color-fg-secondary); }
+
+/* KpiTile (proposed) */
+.kpis { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+.kpi {
+  background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5); display: flex; flex-direction: column; gap: var(--space-1); box-shadow: var(--shadow-1);
+}
+.kpi-label { display: flex; align-items: center; gap: var(--space-2); font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-fg-secondary); }
+.kpi-label .en { margin-left: auto; }
+.kpi-num { font-size: 32px; line-height: 40px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi.hot .kpi-num, .kpi.hot .kpi-label > .ico { color: var(--color-status-p1); }
+
+/* Layout: intake form beside the queue */
+.layout { display: grid; grid-template-columns: minmax(300px, 320px) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+.panel { background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-1); }
+
+/* Form, md tier */
+.form { display: flex; flex-direction: column; gap: var(--space-4); }
+.field { display: flex; flex-direction: column; gap: var(--space-1); margin: 0; padding: 0; border: 0; min-width: 0; }
+.field > label, .field > legend { font-weight: 600; padding: 0; margin-bottom: var(--space-1); }
+.opt-note { font-weight: 400; color: var(--color-fg-secondary); font-size: 14px; }
+.row2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+.input {
+  min-height: var(--target-md); width: 100%; padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-fg-secondary); border-radius: var(--radius-md); background: var(--color-bg-surface);
+}
+textarea.input { min-height: 96px; resize: vertical; }
+.help { font-size: 14px; line-height: 20px; color: var(--color-fg-secondary); margin: 0; }
+.err { display: flex; align-items: flex-start; gap: var(--space-1); font-size: 14px; line-height: 20px; font-weight: 600; color: var(--color-status-p1); margin: 0; }
+.err .ico { margin-top: 2px; }
+.field.invalid .input { border: 2px solid var(--color-status-p1); }
+.field.invalid .opts { outline: 2px solid var(--color-status-p1); outline-offset: 2px; border-radius: var(--radius-md); }
+.opts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.opt {
+  min-height: var(--target-md); min-width: var(--target-md); padding: 0 var(--space-3);
+  display: inline-flex; align-items: center; gap: var(--space-2); cursor: pointer;
+  border: 1px solid var(--color-fg-secondary); border-radius: var(--radius-md); background: var(--color-bg-surface);
+}
+.opt input { margin: 0; width: 18px; height: 18px; accent-color: var(--color-primary); }
+.opt:has(input:checked) { border: 2px solid var(--color-primary); background: var(--color-bg-canvas); font-weight: 600; }
+.opt:has(input:focus-visible) { outline: 3px solid var(--color-focus-ring); outline-offset: 2px; }
+.opt input:focus-visible { outline: none; }
+.opt.p1 .ico { color: var(--color-status-p1); }
+.opt.p2 .ico { color: var(--color-status-p2); }
+.opt.p3 .ico { color: var(--color-status-p3); }
+.deadlines { display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--color-status-p1); font-size: 14px; line-height: 20px; margin: 0; }
+.deadlines .ico { color: var(--color-status-p1); margin-top: 2px; }
+.draft { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); padding: var(--space-3); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-md); background: var(--color-bg-canvas); }
+.draft p { margin: 0; flex: 1 1 100%; display: flex; gap: var(--space-2); align-items: center; font-weight: 600; }
+
+/* Buttons, size tier md */
+.btn {
+  min-height: var(--target-md); min-width: var(--target-md); padding: 0 var(--space-4); border-radius: var(--radius-md);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  font-weight: 600; cursor: pointer; border: 1px solid transparent; text-align: center; white-space: nowrap;
+  transition: background-color 150ms ease-out, border-color 150ms ease-out;
+}
+.btn-primary { background: var(--color-primary); color: var(--color-on-primary); }
+.btn-primary:hover { background: var(--color-primary-hover); }
+.btn-secondary { background: transparent; color: var(--color-fg-primary); border-color: var(--color-fg-secondary); }
+.btn-secondary:hover { background: var(--color-bg-canvas); }
+.btn-ghost { background: transparent; color: var(--color-primary); }
+.btn-ghost:hover { background: var(--color-bg-canvas); }
+.btn-block { width: 100%; }
+
+/* WorkOrderTable (proposed): density sm, md targets */
+.queue-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
+.queue-head .help { white-space: nowrap; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-bg-surface); box-shadow: var(--shadow-1); }
+table { width: 100%; min-width: 960px; border-collapse: collapse; font-size: 14px; line-height: 20px; }
+thead th { text-align: left; font-weight: 600; color: var(--color-fg-secondary); padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border); background: var(--color-bg-canvas); white-space: nowrap; }
+tbody th, tbody td { text-align: left; vertical-align: top; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-border); font-weight: 400; }
+tbody tr:last-child > * { border-bottom: 0; }
+tbody tr:focus { outline: 3px solid var(--color-focus-ring); outline-offset: -3px; }
+tbody tr.is-p1 > th { box-shadow: inset 4px 0 0 var(--color-status-p1); }
+tbody tr.is-closed { color: var(--color-fg-secondary); }
+tbody th { min-width: 200px; }
+tbody td:nth-child(3) { min-width: 150px; }
+.wo-id { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--color-fg-primary); }
+.wo-title { display: block; font-size: 16px; line-height: 24px; font-weight: 600; color: var(--color-fg-primary); }
+.wo-meta { display: block; color: var(--color-fg-secondary); }
+.badges { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+.reporters { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-1); }
+.reporters li { display: flex; align-items: flex-start; gap: var(--space-1); }
+.reporters .ico { margin-top: 2px; color: var(--color-fg-secondary); }
+.muted { color: var(--color-fg-secondary); }
+.actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.link {
+  min-height: var(--target-md); display: inline-flex; align-items: center; gap: var(--space-1);
+  color: var(--color-primary); font-weight: 600; text-underline-offset: 3px; border-radius: var(--radius-sm);
+}
+.skel { display: block; height: 20px; border-radius: var(--radius-sm); background: var(--color-bg-canvas); }
+.skel + .skel { margin-top: var(--space-2); width: 60%; }
+
+/* StatusBadge */
+.badge {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  min-height: 24px; padding: 1px var(--space-2); border-radius: var(--radius-full);
+  font-size: 14px; line-height: 20px; font-weight: 600; white-space: nowrap;
+  border: 1px solid var(--color-border-strong); color: var(--color-fg-secondary); background: transparent;
+}
+.badge .ico { width: 16px; height: 16px; }
+.badge.p1 { background: var(--color-status-p1); color: var(--color-on-status-p1); border-color: transparent; }
+.badge.p2 { background: var(--color-status-p2); color: var(--color-on-status-p2); border-color: transparent; }
+.badge.p3 { background: var(--color-status-p3); color: var(--color-on-status-p3); border-color: transparent; }
+.badge.done { background: var(--color-status-done); color: var(--color-on-status-done); border-color: transparent; }
+.badge.active { color: var(--color-primary); border-color: var(--color-primary); }
+
+/* SlaCountdown */
+.sla { display: inline-flex; align-items: center; gap: var(--space-1); font-weight: 600; color: var(--color-status-p1); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sla.breached { text-decoration: underline; text-underline-offset: 4px; }
+.due { display: block; color: var(--color-fg-secondary); }
+
+/* Dialog + toast */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 20; display: flex; align-items: center; justify-content: center; padding: var(--space-4); }
+.dialog {
+  width: 100%; max-width: 480px; background: var(--color-bg-surface); border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-2); padding: var(--space-6);
+  display: flex; flex-direction: column; gap: var(--space-4); max-height: calc(100vh - 32px); overflow-y: auto;
+}
+.dialog h2 { font-size: 22px; line-height: 30px; }
+.dialog p { margin: 0; }
+.dialog .opts { flex-direction: column; }
+.dialog .opt { width: 100%; justify-content: flex-start; }
+.dialog .opt small { margin-left: auto; color: var(--color-fg-secondary); font-size: 14px; font-weight: 400; }
+.consequence { display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-bg-canvas); }
+.consequence .ico { color: var(--color-status-p2); margin-top: 2px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: var(--space-2); flex-wrap: wrap; }
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: var(--space-6); z-index: 15;
+  width: calc(100% - 32px); max-width: 520px;
+  background: var(--color-fg-primary); color: var(--color-bg-canvas);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-2);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); font-weight: 600;
+}
+.toast .undo { min-height: var(--target-md); padding: 0 var(--space-4); border: 0; border-radius: var(--radius-md); background: transparent; color: inherit; text-decoration: underline; cursor: pointer; font-weight: 600; }
+
+@media (max-width: 1100px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .page { padding: var(--space-4); }
+  .kpis { grid-template-columns: minmax(0, 1fr); }
+  .row2 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="demo" aria-label="ตัวควบคุมสาธิต" role="region" id="demo">
+  <strong>สาธิต</strong>
+  <button type="button" data-action="demo-ack">
+    <svg class="ico ico-sm" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-hand"/></svg><span>จำลองช่างรับงาน P1</span>
+  </button>
+  <button type="button" id="demo-theme" aria-pressed="false" data-action="toggle-theme">ธีมมืด</button>
+  <button type="button" data-action="reset">เริ่มใหม่</button>
+</div>
+
+<main class="page" id="main">
+  <header class="pagehead">
+    <h1>รับแจ้งงาน <span lang="en" class="en">Intake · Sathorn Prime Tower</span></h1>
+    <p class="sync-line" id="sync-line"></p>
+  </header>
+
+  <div id="alerts" role="alert"></div>
+
+  <section aria-labelledby="kpi-title">
+    <h2 id="kpi-title" class="sr-only">ภาพรวมใบงาน</h2>
+    <ul class="kpis" id="kpis"></ul>
+  </section>
+
+  <div class="layout">
+    <section class="panel" aria-labelledby="form-title">
+      <form class="form" id="intake" novalidate>
+        <h2 id="form-title">แจ้งงานใหม่</h2>
+        <div id="draft-host"></div>
+
+        <fieldset class="field" id="f-channel" aria-describedby="e-channel">
+          <legend>ช่องทางแจ้ง</legend>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="channel" value="phone"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-phone"/></svg>โทร</label>
+            <label class="opt"><input type="radio" name="channel" value="line"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-message"/></svg>LINE</label>
+            <label class="opt"><input type="radio" name="channel" value="paper"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-file"/></svg>กระดาษ</label>
+          </div>
+          <p class="err" id="e-channel" hidden></p>
+        </fieldset>
+
+        <div class="field" id="f-reporter">
+          <label for="reporter">ผู้แจ้ง</label>
+          <input class="input" id="reporter" name="reporter" autocomplete="off" aria-describedby="h-reporter e-reporter">
+          <p class="help" id="h-reporter">ชื่อและหน่วยงาน เช่น คุณนภา (ผู้เช่า Orbit)</p>
+          <p class="err" id="e-reporter" hidden></p>
+        </div>
+
+        <div class="row2">
+          <div class="field" id="f-floor">
+            <label for="floor">ชั้น</label>
+            <input class="input" id="floor" name="floor" inputmode="numeric" autocomplete="off" aria-describedby="h-floor e-floor">
+            <p class="help" id="h-floor">1–45, B1–B3 หรือ RF</p>
+            <p class="err" id="e-floor" hidden></p>
+          </div>
+          <div class="field" id="f-zone">
+            <label for="zone">โซน / จุด <span class="opt-note">(ไม่บังคับ)</span></label>
+            <input class="input" id="zone" name="zone" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="field" id="f-equipment">
+          <label for="equipment">อุปกรณ์ <span class="opt-note">(ไม่บังคับ)</span></label>
+          <input class="input" id="equipment" name="equipment" autocomplete="off">
+        </div>
+
+        <div class="field" id="f-details">
+          <label for="details">รายละเอียดอาการ</label>
+          <textarea class="input" id="details" name="details" rows="3" aria-describedby="e-details"></textarea>
+          <p class="err" id="e-details" hidden></p>
+        </div>
+
+        <fieldset class="field" id="f-pri" aria-describedby="e-pri">
+          <legend>ความสำคัญ</legend>
+          <div class="opts">
+            <label class="opt p1"><input type="radio" name="pri" value="p1"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-alert"/></svg>P1</label>
+            <label class="opt p2"><input type="radio" name="pri" value="p2"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-chevron-up"/></svg>P2</label>
+            <label class="opt p3"><input type="radio" name="pri" value="p3"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-minus"/></svg>P3</label>
+          </div>
+          <p class="err" id="e-pri" hidden></p>
+        </fieldset>
+        <div aria-live="polite"><p class="deadlines" id="p1-deadlines" hidden></p></div>
+
+        <button type="submit" class="btn btn-primary btn-block"><svg class="ico" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-save"/></svg>บันทึกใบงาน</button>
+      </form>
+    </section>
+
+    <section aria-labelledby="queue-title" id="queue-section" aria-busy="true">
+      <div class="queue-head">
+        <h2 id="queue-title">คิวใบงาน</h2>
+        <p class="help">P1 ขึ้นก่อน · ปิดแล้วและรวมแล้วอยู่ท้ายตาราง</p>
+      </div>
+      <div class="table-wrap" tabindex="0" role="region" aria-labelledby="queue-title">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">ใบงาน</th>
+              <th scope="col">ความสำคัญ · สถานะ</th>
+              <th scope="col">ผู้แจ้ง · ช่องทาง</th>
+              <th scope="col">SLA</th>
+              <th scope="col">ช่าง</th>
+              <th scope="col">ซิงค์ล่าสุด</th>
+              <th scope="col">การทำงาน</th>
+            </tr>
+          </thead>
+          <tbody id="queue"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+<div id="toast-host" aria-live="polite"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-cloud-check" viewBox="0 0 24 24"><path d="m17 15-5.5 5.5L9 18"/><path d="M5 17.74A7 7 0 1 1 15.71 10h1.79a4.5 4.5 0 0 1 1.5 8.74"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-alert-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
+    <symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m18 15-6-6-6 6"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="1"/></symbol>
+    <symbol id="i-progress" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-6.22-8.56"/></symbol>
+    <symbol id="i-circle-plus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></symbol>
+    <symbol id="i-user-plus" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></symbol>
+    <symbol id="i-git-merge" viewBox="0 0 24 24"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></symbol>
+    <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></symbol>
+  </defs>
+</svg>
+
+<script>
+(function () {
+  "use strict";
+  if (!document.documentElement.lang) document.documentElement.lang = "th";
+
+  // Vocabulary: UX.md §6 glossary. ใหม่ (new) and รวมใบงานแล้ว (merged) are recorded GAPs.
+  var STATUS = {
+    "new":          { label: "ใหม่",            icon: "i-circle-plus", cls: "" },
+    "assigned":     { label: "มอบหมายแล้ว",     icon: "i-dot",         cls: "" },
+    "acknowledged": { label: "รับงานแล้ว",       icon: "i-hand",        cls: "" },
+    "in-progress":  { label: "กำลังทำ",          icon: "i-progress",    cls: "active" },
+    "temp-fix":     { label: "แก้ชั่วคราวแล้ว",   icon: "i-wrench",      cls: "active" },
+    "done":         { label: "ปิดงานแล้ว",       icon: "i-check",       cls: "done" },
+    "merged":       { label: "รวมใบงานแล้ว",     icon: "i-git-merge",   cls: "" }
+  };
+  var PRIORITY = {
+    p1: { label: "P1", icon: "i-alert" },
+    p2: { label: "P2", icon: "i-chevron-up" },
+    p3: { label: "P3", icon: "i-minus" }
+  };
+  var CHANNEL = {
+    phone: { label: "โทร",    icon: "i-phone" },
+    line:  { label: "LINE",   icon: "i-message" },
+    paper: { label: "กระดาษ", icon: "i-file" }
+  };
+  // Example on-shift roster. A real build reads the shift roster.
+  var TECHS = [
+    { id: "t-ek",  name: "ช่างเอก", trade: "ไฟฟ้า" },
+    { id: "t-bee", name: "ช่างบี",  trade: "ปรับอากาศ" },
+    { id: "t-ton", name: "ช่างต้น", trade: "ประปา" }
+  ];
+  var PRI_ORDER = { p1: 0, p2: 1, p3: 2 };
+  var ACK_MS = 15 * 60000, FIX_MS = 4 * 3600000, NEAR_MS = 5 * 60000; // FR-SOPS-002, RULE-009
+  var FLOOR_RE = /^([1-9]|[1-3][0-9]|4[0-5]|B[1-3]|RF)$/;
+  var DRAFT_KEY = "siteops-intake-draft-v1";
+  var UNDO_MS = 5000; // RULE-004
+
+  function ago(min) { return new Date(Date.now() - min * 60000); }
+  function rep(name, channel, at) { return { name: name, channel: channel, at: at }; }
+  function sampleOrders() {
+    return [
+      { id: "SOPS-2421", title: "ไฟดับทั้งโซนฝั่งตะวันตก", floor: "14", zone: "ฝั่ง W", equipment: "ตู้ไฟ DB-14W", pri: "p1", status: "new",
+        reported: ago(11), synced: ago(0), assignee: null, reporters: [rep("คุณนภา (ผู้เช่า Orbit)", "phone", ago(11))], mergedInto: null },
+      { id: "SOPS-2419", title: "น้ำรั่วจากท่อเมนเหนือตู้ไฟ", floor: "B3", zone: "ห้องปั๊มน้ำ", equipment: "", pri: "p1", status: "assigned",
+        reported: ago(3), synced: ago(1), assignee: "ช่างต้น", reporters: [rep("คุณสมชาย (รปภ.)", "phone", ago(3))], mergedInto: null },
+      { id: "SOPS-2417", title: "ลิฟต์โดยสารตัวที่ 3 ค้างระหว่างชั้น 18–19", floor: "18", zone: "โถงลิฟต์ตะวันออก", equipment: "ลิฟต์ L3", pri: "p1", status: "in-progress",
+        reported: ago(244), synced: ago(9), assignee: "ช่างเอก", reporters: [rep("คุณวิภา (อาคาร)", "phone", ago(244))], mergedInto: null },
+      { id: "SOPS-2420", title: "น้ำหยดจากฝ้า ห้องน้ำหญิง", floor: "7", zone: "ห้องน้ำหญิง ฝั่ง N", equipment: "", pri: "p2", status: "new",
+        reported: ago(26), synced: ago(0), assignee: null, reporters: [rep("คุณมาลี (ผู้เช่า Lumen)", "line", ago(26))], mergedInto: null },
+      { id: "SOPS-2422", title: "ฝ้าห้องน้ำหญิงชั้น 7 มีน้ำซึม", floor: "7", zone: "ห้องน้ำหญิง", equipment: "", pri: "p2", status: "new",
+        reported: ago(18), synced: ago(0), assignee: null, reporters: [rep("คุณอรุณ (แม่บ้าน)", "paper", ago(18))], mergedInto: null },
+      { id: "SOPS-2412", title: "แอร์ไม่เย็น ห้องประชุมใหญ่", floor: "21", zone: "โซน C", equipment: "AHU-21C", pri: "p2", status: "acknowledged",
+        reported: ago(95), synced: ago(4), assignee: "ช่างบี", reporters: [rep("คุณแพรว (ผู้เช่า Nimbus)", "line", ago(95))], mergedInto: null },
+      { id: "SOPS-2408", title: "หลอดไฟดับ 2 จุด", floor: "9", zone: "ทางเดินหน้าห้อง 905", equipment: "", pri: "p3", status: "assigned",
+        reported: ago(180), synced: ago(2), assignee: "ช่างเอก", reporters: [rep("คุณอรุณ (แม่บ้าน)", "paper", ago(180))], mergedInto: null },
+      { id: "SOPS-2401", title: "ประตูหนีไฟปิดไม่สนิท", floor: "12", zone: "บันไดหนีไฟ S2", equipment: "Door closer", pri: "p2", status: "done",
+        reported: ago(300), synced: ago(30), assignee: "ช่างต้น", reporters: [rep("คุณวิภา (อาคาร)", "phone", ago(300))], mergedInto: null }
+    ];
+  }
+
+  var state = { orders: sampleOrders(), loading: true, lastSync: new Date(), toastTimer: null, lastFocus: null, draft: null, sig: "" };
+
+  var main = document.getElementById("main");
+  var demo = document.getElementById("demo");
+  var form = document.getElementById("intake");
+  var queue = document.getElementById("queue");
+  var toastHost = document.getElementById("toast-host");
+
+  // ---------- helpers ----------
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function ico(id, extra) { return '<svg class="ico' + (extra ? " " + extra : "") + '" aria-hidden="true" viewBox="0 0 24 24"><use href="#' + id + '"/></svg>'; }
+  function hhmm(d) { return d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }); }
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function find(id) { return state.orders.filter(function (o) { return o.id === id; })[0]; }
+  function isOpen(o) { return o.status !== "done" && o.status !== "merged"; }
+  function ackDue(o) { return new Date(o.reported.getTime() + ACK_MS); }
+  function fixDue(o) { return new Date(o.reported.getTime() + FIX_MS); }
+  function awaitingAck(o) { return o.status === "new" || o.status === "assigned"; }
+  function nextDeadline(o) {
+    if (o.pri !== "p1" || !isOpen(o) || o.status === "temp-fix") return null;
+    return awaitingAck(o) ? { label: "รับงาน", at: ackDue(o) } : { label: "แก้ชั่วคราว", at: fixDue(o) };
+  }
+  function isOver(o) { var d = nextDeadline(o); return !!d && d.at < Date.now(); }
+  function nearBreach(o) { return o.pri === "p1" && isOpen(o) && awaitingAck(o) && ackDue(o) - Date.now() <= NEAR_MS; }
+  function countdown(ms) {
+    ms = Math.abs(ms);
+    var h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000), s = Math.floor((ms % 60000) / 1000);
+    return (h ? h + ":" + pad(m) : pad(m)) + ":" + pad(s);
+  }
+  function timerText(o) {
+    var d = nextDeadline(o);
+    if (!d) return "";
+    var ms = d.at - Date.now();
+    return d.label + (ms < 0 ? " เกินกำหนด " : " เหลือ ") + countdown(ms);
+  }
+  function timerHtml(o) {
+    return '<span class="sla' + (isOver(o) ? " breached" : "") + '" role="timer" data-timer="' + o.id + '">' + ico("i-clock", "ico-sm") + "<span>" + timerText(o) + "</span></span>";
+  }
+  function relMin(d) {
+    var m = Math.floor((Date.now() - d.getTime()) / 60000);
+    return m < 2 ? "" : '<span class="due">' + m + " นาทีก่อน</span>";
+  }
+  function sorted() {
+    return state.orders.slice().sort(function (a, b) {
+      var ao = isOpen(a), bo = isOpen(b);
+      if (ao !== bo) return ao ? -1 : 1;
+      if (PRI_ORDER[a.pri] !== PRI_ORDER[b.pri]) return PRI_ORDER[a.pri] - PRI_ORDER[b.pri];
+      var ad = nextDeadline(a), bd = nextDeadline(b);
+      if (ad && bd) return ad.at - bd.at;
+      return b.reported - a.reported;
+    });
+  }
+  function counts() {
+    var open = state.orders.filter(isOpen);
+    return {
+      open: open.length,
+      p1: open.filter(function (o) { return o.pri === "p1"; }).length,
+      over: open.filter(isOver).length
+    };
+  }
+  function signature() {
+    var c = counts();
+    return [c.open, c.p1, c.over].join() + "|" +
+      state.orders.filter(nearBreach).map(function (o) { return o.id; }).join() + "|" +
+      state.orders.filter(isOver).map(function (o) { return o.id; }).join();
+  }
+
+  // ---------- render ----------
+  function renderSummary() {
+    var c = counts();
+    document.getElementById("sync-line").innerHTML = ico("i-cloud-check", "ico-sm") + "ซิงค์ล่าสุด " + hhmm(state.lastSync);
+    document.getElementById("kpis").innerHTML =
+      kpi("open", "i-inbox", "ใบงานเปิด", "Open", c.open, false) +
+      kpi("p1", "i-alert", "P1 เปิดอยู่", "P1", c.p1, false) +
+      kpi("over", "i-clock", "เกิน SLA", "Over SLA", c.over, c.over > 0);
+
+    var near = sorted().filter(nearBreach);
+    document.getElementById("alerts").innerHTML = near.map(function (o) {
+      var who = o.assignee ? "โทรตาม" + esc(o.assignee) + "ให้กดรับงาน" : "มอบหมายช่างทันที";
+      return '<div class="alert-banner" data-alert="' + o.id + '">' + ico("i-alert") +
+        '<div><p><strong>P1 ' + o.id + " ยังไม่มีช่างรับงาน</strong> · " + esc(o.title) + " · ชั้น " + esc(o.floor) + "</p>" +
+        "<p>" + timerHtml(o) + ' <span class="next">— ' + who + "</span></p></div></div>";
+    }).join("");
+  }
+  function kpi(key, icon, label, en, n, hot) {
+    return '<li class="kpi' + (hot ? " hot" : "") + '" data-kpi="' + key + '"><span class="kpi-label">' + ico(icon) + label +
+      ' <span lang="en" class="en">' + en + '</span></span><span class="kpi-num">' + n + "</span></li>";
+  }
+
+  function badges(o) {
+    var s = STATUS[o.status], p = PRIORITY[o.pri];
+    return '<div class="badges"><span class="badge ' + o.pri + '">' + ico(p.icon) + p.label + "</span>" +
+      '<span class="badge ' + s.cls + '">' + ico(s.icon) + s.label + "</span></div>";
+  }
+  function mergeTargets(o) {
+    return sorted().filter(function (t) { return t.id !== o.id && isOpen(t); });
+  }
+  function row(o) {
+    var closed = !isOpen(o);
+    var loc = "ชั้น " + esc(o.floor) + (o.zone ? " · " + esc(o.zone) : "") + (o.equipment ? " · " + esc(o.equipment) : "");
+    var h = '<tr id="row-' + o.id + '" data-id="' + o.id + '" tabindex="-1" class="' + (o.pri === "p1" && !closed ? "is-p1" : "") + (closed ? " is-closed" : "") + '">';
+    h += '<th scope="row"><span class="wo-id">' + o.id + '</span> <span class="muted">· แจ้งเมื่อ ' + hhmm(o.reported) + "</span>" +
+      '<span class="wo-title" id="t-' + o.id + '">' + esc(o.title) + '</span><span class="wo-meta">' + loc + "</span></th>";
+    h += "<td>" + badges(o) + "</td>";
+    h += '<td><ul class="reporters">' + o.reporters.map(function (r) {
+      var c = CHANNEL[r.channel];
+      return "<li>" + ico(c.icon, "ico-sm") + "<span>" + c.label + " · " + esc(r.name) + "</span></li>";
+    }).join("") + "</ul></td>";
+    if (nextDeadline(o)) {
+      h += "<td>" + timerHtml(o) +
+        '<span class="due">รับงานภายใน ' + hhmm(ackDue(o)) + "</span>" +
+        '<span class="due">แก้ชั่วคราวภายใน ' + hhmm(fixDue(o)) + "</span></td>";
+    } else {
+      h += '<td class="muted">' + (o.pri === "p1" ? "ผ่านแล้ว" : "ไม่มี SLA") + "</td>";
+    }
+    h += "<td>" + (o.assignee ? '<span class="reporters"><span>' + esc(o.assignee) + "</span></span>" : '<span class="muted">ยังไม่มอบหมาย</span>') + "</td>";
+    h += "<td>" + hhmm(o.synced) + relMin(o.synced) + "</td>";
+    h += '<td><div class="actions">';
+    if (o.status === "merged") {
+      h += '<a class="link" href="#row-' + o.mergedInto + '" data-action="goto" data-id="' + o.mergedInto + '">' + ico("i-git-merge", "ico-sm") + "รวมเข้า " + o.mergedInto + "</a>";
+    } else {
+      if (o.status === "new") {
+        h += '<button type="button" class="btn btn-secondary" data-action="ask-assign" data-id="' + o.id + '" data-key="assign-' + o.id + '" aria-describedby="t-' + o.id + '">' + ico("i-user-plus") + "มอบหมาย</button>";
+      }
+      if (awaitingAck(o) && mergeTargets(o).length) {
+        h += '<button type="button" class="btn btn-ghost" data-action="ask-merge" data-id="' + o.id + '" data-key="merge-' + o.id + '" aria-describedby="t-' + o.id + '">' + ico("i-git-merge") + "รวมใบงาน</button>";
+      }
+      if (!awaitingAck(o)) h += '<span class="muted">—</span>';
+    }
+    return h + "</div></td></tr>";
+  }
+  function renderQueue() {
+    var section = document.getElementById("queue-section");
+    if (state.loading) {
+      var sk = "";
+      for (var i = 0; i < 5; i++) sk += '<tr aria-hidden="true"><td colspan="7"><span class="skel"></span><span class="skel"></span></td></tr>';
+      queue.innerHTML = sk;
+      section.setAttribute("aria-busy", "true");
+      return;
+    }
+    section.setAttribute("aria-busy", "false");
+    var list = sorted();
+    queue.innerHTML = list.length ? list.map(row).join("") :
+      '<tr><td colspan="7"><p class="muted">' + ico("i-clipboard", "ico-sm") + " ยังไม่มีงานวันนี้</p></td></tr>";
+  }
+
+  function render() {
+    var a = document.activeElement;
+    var key = a && a.getAttribute && a.getAttribute("data-key");
+    renderSummary();
+    renderQueue();
+    state.sig = signature();
+    if (key) { var again = document.querySelector('[data-key="' + key + '"]'); if (again) again.focus(); }
+  }
+  function focusRow(id) {
+    var r = document.getElementById("row-" + id);
+    if (r) { r.focus(); r.scrollIntoView({ block: "nearest" }); }
+  }
+
+  // ---------- toast ----------
+  function toast(text, undo) {
+    clearTimeout(state.toastTimer);
+    toastHost.innerHTML = '<div class="toast"><span>' + text + "</span>" + (undo ? '<button type="button" class="undo" data-action="undo">เลิกทำ</button>' : "") + "</div>";
+    toastHost._undo = undo || null;
+    state.toastTimer = setTimeout(function () { toastHost.innerHTML = ""; toastHost._undo = null; }, UNDO_MS);
+  }
+
+  // ---------- dialogs ----------
+  function openDialog(inner, labelId, descId) {
+    state.lastFocus = document.activeElement;
+    main.inert = true; demo.inert = true;
+    var scrim = document.createElement("div");
+    scrim.className = "scrim"; scrim.id = "dialog";
+    scrim.innerHTML = '<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="' + labelId + '" aria-describedby="' + descId + '">' + inner + "</div>";
+    document.body.appendChild(scrim);
+    var first = scrim.querySelector("input, select, button");
+    if (first) first.focus();
+    return scrim;
+  }
+  function closeDialog(focusId) {
+    var d = document.getElementById("dialog");
+    if (d) d.remove();
+    main.inert = false; demo.inert = false;
+    if (focusId) focusRow(focusId);
+    else if (state.lastFocus && document.contains(state.lastFocus)) state.lastFocus.focus();
+  }
+  function load(name) { return state.orders.filter(function (o) { return isOpen(o) && o.assignee === name; }).length; }
+
+  function askAssign(o) {
+    var opts = TECHS.map(function (t, i) {
+      return '<label class="opt"><input type="radio" name="tech" value="' + esc(t.name) + '">' + ico("i-user") +
+        esc(t.name) + " · " + esc(t.trade) + "<small>งานเปิด " + load(t.name) + "</small></label>";
+    }).join("");
+    openDialog(
+      '<h2 id="dlg-title">มอบหมาย ' + o.id + "</h2>" +
+      '<p id="dlg-desc">' + esc(o.title) + " · ชั้น " + esc(o.floor) + "</p>" +
+      '<fieldset class="field" aria-describedby="e-tech"><legend>ช่างที่อยู่ในกะ</legend><div class="opts">' + opts + "</div>" +
+      '<p class="err" id="e-tech" hidden></p></fieldset>' +
+      '<div class="dialog-actions"><button type="button" class="btn btn-secondary" data-action="close-dialog">ยกเลิก</button>' +
+      '<button type="button" class="btn btn-primary" data-action="confirm-assign" data-id="' + o.id + '">' + ico("i-user-plus") + "มอบหมาย</button></div>",
+      "dlg-title", "dlg-desc");
+  }
+  function confirmAssign(o) {
+    var picked = document.querySelector("#dialog input[name=tech]:checked");
+    if (!picked) {
+      var e = document.getElementById("e-tech");
+      e.innerHTML = ico("i-alert-circle", "ico-sm") + "<span>เลือกช่าง 1 คน</span>"; e.hidden = false;
+      document.querySelector("#dialog input[name=tech]").focus();
+      return;
+    }
+    var prev = { status: o.status, assignee: o.assignee, synced: o.synced };
+    o.status = "assigned"; o.assignee = picked.value; o.synced = new Date();
+    closeDialog(o.id);
+    render(); focusRow(o.id);
+    toast("มอบหมาย " + o.id + " ให้" + esc(o.assignee) + "แล้ว", function () {
+      o.status = prev.status; o.assignee = prev.assignee; o.synced = prev.synced; render(); focusRow(o.id);
+    });
+  }
+
+  function askMerge(o) {
+    var targets = mergeTargets(o);
+    var suggested = targets.filter(function (t) { return t.floor === o.floor; })[0] || targets[0];
+    var options = targets.map(function (t) {
+      return '<option value="' + t.id + '"' + (t === suggested ? " selected" : "") + ">" + t.id + " · " + esc(t.title) + " · ชั้น " + esc(t.floor) + "</option>";
+    }).join("");
+    openDialog(
+      '<h2 id="dlg-title">รวมใบงาน ' + o.id + "</h2>" +
+      '<div class="field"><label for="merge-target">รวมเข้ากับใบงาน</label><select class="input" id="merge-target">' + options + "</select></div>" +
+      '<p class="consequence" id="dlg-desc">' + ico("i-alert") + "<span>ย้อนกลับไม่ได้ · " + o.id + " จะเปลี่ยนเป็น “รวมใบงานแล้ว” และผู้แจ้งทุกคนพร้อมช่องทางแจ้งจะย้ายไปอยู่ในใบงานที่เลือก</span></p>" +
+      '<div class="dialog-actions"><button type="button" class="btn btn-secondary" data-action="close-dialog">ยกเลิก</button>' +
+      '<button type="button" class="btn btn-primary" data-action="confirm-merge" data-id="' + o.id + '">' + ico("i-git-merge") + "ยืนยันรวมใบงาน</button></div>",
+      "dlg-title", "dlg-desc");
+  }
+  function confirmMerge(o) {
+    var target = find(document.getElementById("merge-target").value);
+    target.reporters = target.reporters.concat(o.reporters);
+    o.status = "merged"; o.mergedInto = target.id;
+    o.synced = target.synced = new Date();
+    closeDialog(target.id);
+    render(); focusRow(target.id);
+    toast("รวม " + o.id + " เข้า " + target.id + " แล้ว");
+  }
+
+  // ---------- intake form ----------
+  var FIELDS = ["channel", "reporter", "floor", "details", "pri"];
+  function readForm() {
+    var ch = form.querySelector("input[name=channel]:checked"), pr = form.querySelector("input[name=pri]:checked");
+    return {
+      channel: ch ? ch.value : "", pri: pr ? pr.value : "",
+      reporter: form.reporter.value, floor: form.floor.value, zone: form.zone.value,
+      equipment: form.equipment.value, details: form.details.value
+    };
+  }
+  function fillForm(d) {
+    ["channel", "pri"].forEach(function (n) {
+      Array.prototype.forEach.call(form.querySelectorAll("input[name=" + n + "]"), function (r) { r.checked = r.value === d[n]; });
+    });
+    ["reporter", "floor", "zone", "equipment", "details"].forEach(function (n) { form[n].value = d[n] || ""; });
+    updateP1Preview();
+  }
+  function isEmpty(d) { return !Object.keys(d).some(function (k) { return k !== "savedAt" && String(d[k] || "").trim(); }); }
+  function validate(d) {
+    var e = {};
+    if (!d.channel) e.channel = "เลือกช่องทางแจ้ง";
+    if (!d.reporter.trim()) e.reporter = "กรอกชื่อผู้แจ้ง";
+    var fl = d.floor.trim().toUpperCase();
+    if (!fl) e.floor = "กรอกชั้น";
+    else if (!FLOOR_RE.test(fl)) e.floor = "ชั้นต้องเป็น 1–45, B1–B3 หรือ RF";
+    if (!d.details.trim()) e.details = "กรอกรายละเอียดอาการ";
+    if (!d.pri) e.pri = "เลือกความสำคัญ";
+    return e;
+  }
+  function controlsFor(name) {
+    return name === "channel" || name === "pri"
+      ? Array.prototype.slice.call(form.querySelectorAll("input[name=" + name + "]"))
+      : [form[name]];
+  }
+  function showErrors(errors) {
+    FIELDS.forEach(function (name) {
+      var msg = errors[name], el = document.getElementById("e-" + name), wrap = document.getElementById("f-" + name);
+      el.innerHTML = msg ? ico("i-alert-circle", "ico-sm") + "<span>" + msg + "</span>" : "";
+      el.hidden = !msg;
+      wrap.classList.toggle("invalid", !!msg);
+      controlsFor(name).forEach(function (c) { if (msg) c.setAttribute("aria-invalid", "true"); else c.removeAttribute("aria-invalid"); });
+    });
+  }
+  function nextId() {
+    var max = state.orders.reduce(function (m, o) { return Math.max(m, Number(o.id.slice(5))); }, 0);
+    return "SOPS-" + (max + 1);
+  }
+  function updateP1Preview() {
+    var p = document.getElementById("p1-deadlines");
+    var isP1 = !!form.querySelector("input[name=pri][value=p1]:checked");
+    p.hidden = !isP1;
+    if (!isP1) return;
+    var now = Date.now();
+    var text = "ถ้าบันทึกตอนนี้ · รับงานภายใน " + hhmm(new Date(now + ACK_MS)) + " (15 นาที) · แก้ชั่วคราวภายใน " + hhmm(new Date(now + FIX_MS)) + " (4 ชม.)";
+    if (p.dataset.text !== text) {
+      p.dataset.text = text;
+      p.innerHTML = ico("i-clock") + "<span>" + text + "</span>";
+    }
+  }
+  function submit(e) {
+    e.preventDefault();
+    var d = readForm(), errors = validate(d);
+    showErrors(errors);
+    var firstBad = FIELDS.filter(function (n) { return errors[n]; })[0];
+    if (firstBad) { controlsFor(firstBad)[0].focus(); return; }
+    var now = new Date();
+    var details = d.details.trim();
+    var o = {
+      id: nextId(), title: details.split("\n")[0].slice(0, 60), floor: d.floor.trim().toUpperCase(), zone: d.zone.trim(), equipment: d.equipment.trim(),
+      pri: d.pri, status: "new", reported: now, synced: now, assignee: null,
+      reporters: [rep(d.reporter.trim(), d.channel, now)], mergedInto: null
+    };
+    state.orders.push(o);
+    form.reset(); updateP1Preview(); clearDraft(); hideDraftNotice();
+    render();
+    toast("บันทึกใบงาน " + o.id + " แล้ว · ใหม่ · " + hhmm(now));
+    form.querySelector("input[name=channel]").focus();
+  }
+
+  // ---------- draft (RULE-008) ----------
+  function storage() { try { return window.localStorage; } catch (_) { return null; } }
+  function saveDraft() {
+    var s = storage(); if (!s) return;
+    var d = readForm();
+    try {
+      if (isEmpty(d)) s.removeItem(DRAFT_KEY);
+      else { d.savedAt = Date.now(); s.setItem(DRAFT_KEY, JSON.stringify(d)); }
+    } catch (_) { /* storage full or blocked: the form still works */ }
+  }
+  function clearDraft() { var s = storage(); try { if (s) s.removeItem(DRAFT_KEY); } catch (_) {} }
+  function loadDraft() {
+    var s = storage(); if (!s) return null;
+    try { var d = JSON.parse(s.getItem(DRAFT_KEY) || "null"); return d && !isEmpty(d) ? d : null; } catch (_) { return null; }
+  }
+  function showDraftNotice(d) {
+    state.draft = d;
+    document.getElementById("draft-host").innerHTML =
+      '<div class="draft" role="status"><p>' + ico("i-clipboard") + "มีแบบร่างค้าง · บันทึกเมื่อ " + hhmm(new Date(d.savedAt)) + "</p>" +
+      '<button type="button" class="btn btn-secondary" data-action="resume-draft">ใช้แบบร่างต่อ</button>' +
+      '<button type="button" class="btn btn-ghost" data-action="discard-draft">ทิ้งแบบร่าง</button></div>';
+  }
+  function hideDraftNotice() { state.draft = null; document.getElementById("draft-host").innerHTML = ""; }
+
+  // ---------- demo ----------
+  function effectiveDark() {
+    var t = document.documentElement.getAttribute("data-theme");
+    if (t) return t === "dark";
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function syncThemeButton() { document.getElementById("demo-theme").setAttribute("aria-pressed", String(effectiveDark())); }
+
+  // ---------- events ----------
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-action]");
+    if (!el) return;
+    var act = el.getAttribute("data-action");
+    var o = el.dataset.id ? find(el.dataset.id) : null;
+    if (act === "ask-assign") askAssign(o);
+    else if (act === "confirm-assign") confirmAssign(o);
+    else if (act === "ask-merge") askMerge(o);
+    else if (act === "confirm-merge") confirmMerge(o);
+    else if (act === "close-dialog") closeDialog();
+    else if (act === "goto") { e.preventDefault(); focusRow(el.dataset.id); }
+    else if (act === "undo") { var u = toastHost._undo; toastHost.innerHTML = ""; toastHost._undo = null; if (u) u(); }
+    else if (act === "resume-draft") { var d = state.draft; hideDraftNotice(); fillForm(d); saveDraft(); form.querySelector("input, textarea").focus(); }
+    else if (act === "discard-draft") { hideDraftNotice(); saveDraft(); form.querySelector("input").focus(); }
+    else if (act === "demo-ack") {
+      var hit = state.orders.filter(nearBreach);
+      hit.forEach(function (x) { x.status = "acknowledged"; x.assignee = x.assignee || "ช่างเอก"; x.synced = new Date(); });
+      render();
+      toast(hit.length ? "ช่างรับงาน " + hit.map(function (x) { return x.id; }).join(", ") + " แล้ว" : "ไม่มี P1 ที่ใกล้เกินกำหนดรับงาน");
+    }
+    else if (act === "toggle-theme") { document.documentElement.setAttribute("data-theme", effectiveDark() ? "light" : "dark"); syncThemeButton(); }
+    else if (act === "reset") {
+      state.orders = sampleOrders(); state.lastSync = new Date();
+      form.reset(); showErrors({}); updateP1Preview(); clearDraft(); hideDraftNotice(); render();
+    }
+  });
+  form.addEventListener("submit", submit);
+  form.addEventListener("input", saveDraft);
+  form.addEventListener("change", function (e) {
+    saveDraft();
+    if (e.target.name === "pri") updateP1Preview();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && document.getElementById("dialog")) closeDialog();
+  });
+
+  // Tick: timer text every second; KPIs, banner and row flags re-render only when they change.
+  setInterval(function () {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-timer]"), function (el) {
+      var o = find(el.getAttribute("data-timer"));
+      if (o) el.lastElementChild.textContent = timerText(o);
+    });
+    updateP1Preview();
+    if (!state.loading && signature() !== state.sig) render();
+  }, 1000);
+
+  syncThemeButton();
+  var draft = loadDraft();
+  if (draft) showDraftNotice(draft);
+  render();
+  // Skeleton while the queue "loads" (UX.md §5 loading).
+  setTimeout(function () { state.loading = false; render(); }, 450);
+}());
+</script>
+</body>
+</html>

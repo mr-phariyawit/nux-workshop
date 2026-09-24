@@ -157,7 +157,13 @@ Each component lists variants, states, and its platform mapping. Detailed per-co
 - Platform mapping: custom, `role="status"`
 
 ### Proposed additions
-_None. Add here when a generator needs something not listed._
+_Add here when a generator needs something not listed._
+
+Proposed by the Intake dashboard build (`docs/homework/session-2/vibe-coding.md`). Status: `proposed`, not yet reviewed.
+
+- **KpiTile**: number in `--text-display`, Thai label with an optional English secondary line; the over-SLA tile uses `--color-status-p1` text and the `alert` icon when non-zero. Dashboard only.
+- **SlaAlertBanner**: full-width bar under the dashboard header, `--color-status-p1` 2 px border, `alert` icon, work-order ID, a `role="timer"` countdown and the next step in words. No dismiss control (RULE-009). `role="alert"`.
+- **WorkOrderTable**: `WorkOrderCard` variant `dashboard` rendered as table rows; density `sm` (14 px text, `--space-2` cell padding) with `md` targets; merged rows show a link to the survivor.
 
 ## 7. Iconography
 
