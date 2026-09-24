@@ -42,7 +42,7 @@ docs/homework/
 │   ├── AGENTS.md                 agent operating contract for the SiteOps repo
 │   ├── prompts/                  filled Stitch + Figma Make prompts
 │   ├── a11y-workshop.md          the login-page workshop: defects, fix, verification
-│   └── vibe-coding.md            the vibe-coded SiteOps Field screens and the rules they satisfy
+│   └── vibe-coding.md            the vibe-coded SiteOps Field and Intake screens and the rules they satisfy
 └── session-3/                    AI Design System Handoff
     ├── CONVENTIONS.md            five-file set, naming, token rules, spec heading contract
     ├── MEMORY.md                 verified-facts ledger (MEM-001…)
@@ -59,6 +59,7 @@ Code for the homework lives in `src/` and `tests/`:
 
 - `src/session-2/login-a11y/` — the a11y workshop page, before and after.
 - `src/session-2/siteops-app/` — SiteOps Field, the vibe-coded My Work + Work Order Detail screens (open `index.html` in a browser).
+- `src/session-2/siteops-intake/` — SiteOps Intake, the dispatcher dashboard: intake form, KPIs, P1 near-breach banner, queue with assign and merge (open `index.html` in a browser).
 - `src/mcp/sitops-design-system/` — read-only MCP server over `DESIGN.md` and the Session 3 specs (`catalog.ts` parser, `contrast.ts` WCAG maths, `tools.ts` handlers, `server.ts` stdio / Streamable HTTP wiring).
 - `tests/session-2/`, `tests/session-3/` — Playwright + axe checks and MCP unit tests.
 
