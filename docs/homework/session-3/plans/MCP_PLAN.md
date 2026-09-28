@@ -61,7 +61,9 @@ without a process. `server.ts` is the only file that reads `process.env`.
 - HTTP mode starts only when `SITOPS_MCP_BEARER_TOKEN` is set; the token is never logged, echoed in a tool result, or written to disk.
 - Every request must carry `Authorization: Bearer <token>`; mismatch → 401, no body detail.
 - Tools are read-only, so a leaked token exposes the design system, not the ability to change it. That is the trade the ADR makes.
-- Token comparison is constant-time (`timingSafeEqual`).
+- Token comparison is constant-time over SHA-256 digests of both sides, so neither the content nor the length of the token leaks through timing.
+- HTTP mode binds to `127.0.0.1` unless `--host` says otherwise. Exposing the server beyond the machine is an explicit choice (`--host 0.0.0.0`), and the startup log prints the address actually bound.
+- `GET /health` and `GET /info` are anonymous, so an agent or a load balancer can check liveness and snapshot freshness without the token. They return no spec content (ADR-001 amendment).
 
 ## Risks
 

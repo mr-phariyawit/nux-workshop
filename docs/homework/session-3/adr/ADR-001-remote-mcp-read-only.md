@@ -51,3 +51,24 @@ Negative:
 1. **Read-write with an allowlist of safe writes** (append to `Known gaps` only). Rejected: "safe" grows, and the test that proves read-only becomes a policy document.
 2. **Per-user tokens with write scope for leads.** Rejected for now: no identity provider in scope; revisit when SiteOps has SSO (`[AMBIGUOUS]` AD vs local login in Session 1).
 3. **No remote server; vendor Markdown into each tool.** Rejected: guarantees drift across Figma Make, Cursor, Claude Code.
+
+## Amendment 1 — 2026-09-28: anonymous health and info endpoints, loopback default
+
+Operators and agents need to know whether the server is up and *which snapshot*
+of the contracts it serves (course-map lesson 9: make freshness observable)
+without holding the token. HTTP mode therefore answers two anonymous `GET`
+routes besides the bearer-guarded `/mcp`:
+
+| Route | Returns | Never returns |
+|---|---|---|
+| `/health` | `200 {status:"ok"}` when DESIGN.md and every spec parse; `503 {status:"catalog-error"}` otherwise | the parser error text |
+| `/info` | server name + version, DESIGN.md version, component count, commit (`SITOPS_COMMIT_SHA`, else `"unknown"`) | tokens, spec sections, file paths |
+
+The version and component count are judged non-confidential; everything a tool
+returns stays behind the bearer. Any other path is 404; a non-`GET` on these
+two routes is 405.
+
+HTTP mode binds `127.0.0.1` unless started with `--host`. Serving remote agents
+is an explicit `--host 0.0.0.0` (or a reverse proxy in front of loopback), so a
+developer testing remote mode on a laptop does not expose it to the network by
+accident.

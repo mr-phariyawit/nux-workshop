@@ -143,3 +143,21 @@ test("check_contrast fails softly on unknown token or non-colour", () => {
   assert.ok(isFailure(garbage));
   assert.equal(judgeContrast("#fff", "#000").textAA, true);
 });
+
+test("check_contrast: a 4- or 5-digit hex token is a soft failure, not a throw (MCP_TASKS T6.4)", () => {
+  const withBadTokens: Catalog = {
+    ...catalog,
+    tokens: {
+      ...catalog.tokens,
+      light: [...catalog.tokens.light, { name: "--color-test-4", value: "#ABCD" }, { name: "--color-test-5", value: "#ABCDE" }],
+    },
+  };
+  for (const name of ["--color-test-4", "--color-test-5"]) {
+    const r = checkContrast(withBadTokens, { foreground: name, background: "--color-primary", theme: "light" });
+    assert.ok(isFailure(r) && /not a colour/.test(r.error), `${name} must be rejected softly`);
+  }
+  for (const hex of ["#ABCD", "ABCDE", "#ABCDEFA"]) {
+    const r = checkContrast(catalog, { foreground: hex, background: "#FFFFFF", theme: "light" });
+    assert.ok(isFailure(r), `${hex} is not a 3- or 6-digit hex`);
+  }
+});

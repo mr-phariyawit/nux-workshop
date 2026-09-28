@@ -35,6 +35,14 @@ Status: ☐ todo · ☑ done · ⊘ dropped (with reason)
 - [x] T5.3 `adr/ADR-001-remote-mcp-read-only.md`
 - [ ] T5.4 Agent skill (`skills/sitops-design-system/SKILL.md`) that tells Claude Code when to call which tool — ⊘ dropped for the homework; the tool descriptions carry the same guidance
 
+## T6 Hardening (post-review, 2026-09-28)
+- [x] T6.1 HTTP mode binds `127.0.0.1` by default; `--host` opts in to wider exposure; the log prints the bound address. `--port` is validated (integer 0–65535).
+- [x] T6.2 Bearer compare hashes both sides with SHA-256 before `timingSafeEqual`, so a length mismatch returns in the same time as a content mismatch
+- [x] T6.3 Anonymous `GET /health` (catalog parses → 200, else 503) and `GET /info` (server version, DESIGN.md version, component count, commit from `SITOPS_COMMIT_SHA`), no spec content; ADR-001 amendment
+- [x] T6.4 `check_contrast` accepts only 3- or 6-digit hex tokens; a 4/5-digit value is a soft `not a colour` failure, not a thrown exception
+- [x] T6.5 Spec body starts where the front-matter match ends, so mixed line endings or a `---` rule in the body cannot shift the section split
+- [x] T6.6 Entry-point check uses `pathToFileURL`, so the server starts from a path containing `#`, `?` or `%` (a raw `file://` string reads those as fragment, query or escape)
+
 ## Dropped
 - Figma tools — no file exists (every spec has the GAP).
 - Storybook MCP bridge — no Storybook in this repo; the `render-meta` block is the contract Storybook stories would be generated from.

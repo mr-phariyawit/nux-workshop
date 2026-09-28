@@ -68,7 +68,8 @@ npm install
 npm run typecheck
 npm test                                   # unit (session-3) + e2e (session-2, needs Chromium)
 npm run mcp:sitops                         # MCP over stdio for a local agent
-SITOPS_MCP_BEARER_TOKEN=<32+ chars> npm run mcp:sitops -- --http --port 3333   # remote mode, bearer required
+SITOPS_MCP_BEARER_TOKEN=<32+ chars> npm run mcp:sitops -- --http --port 3333   # HTTP on 127.0.0.1, bearer required
+# add --host 0.0.0.0 to serve other machines; GET /health and /info need no token
 ```
 
 ## What the gates caught (the point of the exercise)
