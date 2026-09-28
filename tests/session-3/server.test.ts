@@ -205,3 +205,24 @@ test("entry point starts from a directory whose name has # in it (T6.6)", async 
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("HTTP: an unparseable request target is 400 and the server keeps serving (T6.7)", async () => {
+  const { connect } = await import("node:net");
+  const { http, base } = await listen(createHttpHandler({ token: HTTP_TOKEN, commit: "unknown" }));
+  try {
+    const port = Number(new URL(base).port);
+    // fetch() cannot send this target; Node's HTTP parser accepts it, new URL() does not.
+    const raw = await new Promise<string>((resolve, reject) => {
+      const socket = connect(port, "127.0.0.1", () => socket.end("GET http://[ HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n"));
+      let data = "";
+      socket.on("data", (chunk) => (data += chunk.toString()));
+      socket.on("end", () => resolve(data));
+      socket.on("error", reject);
+    });
+    assert.match(raw, /^HTTP\/1\.1 400 /);
+    assert.equal((await fetch(`${base}/health`)).status, 200, "server must survive the bad request");
+  } finally {
+    http.closeAllConnections();
+    await new Promise<void>((resolve) => http.close(() => resolve()));
+  }
+});

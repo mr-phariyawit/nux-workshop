@@ -42,6 +42,7 @@ Status: ☐ todo · ☑ done · ⊘ dropped (with reason)
 - [x] T6.4 `check_contrast` accepts only 3- or 6-digit hex tokens; a 4/5-digit value is a soft `not a colour` failure, not a thrown exception
 - [x] T6.5 Spec body starts where the front-matter match ends, so mixed line endings or a `---` rule in the body cannot shift the section split
 - [x] T6.6 Entry-point check uses `pathToFileURL`, so the server starts from a path containing `#`, `?` or `%` (a raw `file://` string reads those as fragment, query or escape)
+- [x] T6.7 A request target `new URL()` cannot parse (e.g. `GET http://[`) gets 400 before any auth check; any other failure in the handler becomes 500, never an unhandled rejection that stops the process (found by Codex review on PR #9)
 
 ## Dropped
 - Figma tools — no file exists (every spec has the GAP).

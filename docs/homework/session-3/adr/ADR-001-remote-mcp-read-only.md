@@ -66,7 +66,8 @@ routes besides the bearer-guarded `/mcp`:
 
 The version and component count are judged non-confidential; everything a tool
 returns stays behind the bearer. Any other path is 404; a non-`GET` on these
-two routes is 405.
+two routes is 405; an unparseable request target is 400. No request, authenticated
+or not, can stop the process: handler failures become 500.
 
 HTTP mode binds `127.0.0.1` unless started with `--host`. Serving remote agents
 is an explicit `--host 0.0.0.0` (or a reverse proxy in front of loopback), so a

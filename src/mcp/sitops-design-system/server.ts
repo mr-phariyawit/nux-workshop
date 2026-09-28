@@ -136,9 +136,34 @@ function sendJson(res: ServerResponse, status: number, body: Record<string, unkn
  * Request handler for HTTP mode. /health and /info are anonymous and return no
  * spec content; /mcp needs the bearer; everything else is 404.
  */
-export function createHttpHandler({ token, commit, paths = DEFAULT_PATHS, load = loadCatalog }: HttpOptions): RequestListener {
-  return async (req: IncomingMessage, res: ServerResponse) => {
-    const route = new URL(req.url ?? "/", "http://localhost").pathname;
+export function createHttpHandler(options: HttpOptions): RequestListener {
+  const handle = routeRequest(options);
+  // Node does not await a listener: a rejection here would be unhandled and
+  // stop the process, so one bad request must never escape (MCP_TASKS T6.7).
+  return (req, res) => {
+    handle(req, res).catch(() => {
+      if (!res.headersSent) res.writeHead(500).end();
+      else res.destroy();
+    });
+  };
+}
+
+/** Pathname of the request target, or null when it is not a parseable URL. */
+function requestPath(url: string | undefined): string | null {
+  try {
+    return new URL(url ?? "/", "http://localhost").pathname;
+  } catch {
+    return null;
+  }
+}
+
+function routeRequest({ token, commit, paths = DEFAULT_PATHS, load = loadCatalog }: HttpOptions) {
+  return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
+    const route = requestPath(req.url);
+    if (route === null) {
+      res.writeHead(400).end();
+      return;
+    }
 
     if (route === "/health" || route === "/info") {
       if (req.method !== "GET") {
