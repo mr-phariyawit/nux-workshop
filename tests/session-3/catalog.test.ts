@@ -4,6 +4,8 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import {
   CatalogError,
   DEFAULT_PATHS,
@@ -84,4 +86,21 @@ o
   assert.throws(() => parseComponentSpec(minimal, "/x/x.md"), /missing section "## Known gaps"/);
   assert.throws(() => parseComponentSpec(minimal.replace("status: ready", "status: shipped"), "/x/x.md"), /not draft\|ready\|deprecated/);
   assert.throws(() => parseComponentSpec(minimal.replace("id: CMP-x", "id: Button"), "/x/x.md"), /must match CMP-<kebab>/);
+});
+
+test("spec body starts after the front matter, whatever the line endings (MCP_TASKS T6.5)", async () => {
+  const lf = await readFile(path.join(DEFAULT_PATHS.componentsDir, "button.md"), "utf8");
+  const reference = parseComponentSpec(lf, "button.md");
+
+  const crlf = parseComponentSpec(lf.replace(/\n/g, "\r\n"), "button.md");
+  assert.equal(crlf.renderMeta.id, reference.renderMeta.id);
+  assert.deepEqual(Object.keys(crlf.sections), Object.keys(reference.sections));
+
+  // CRLF front matter, LF body with a horizontal rule: the old "\n---\n" search
+  // skipped to the rule and lost every section before it.
+  const end = lf.indexOf("\n---\n", 4) + 5;
+  const mixed = lf.slice(0, end).replace(/\n/g, "\r\n") + lf.slice(end).replace("\n## Known gaps", "\n---\n\n## Known gaps");
+  const parsed = parseComponentSpec(mixed, "button.md");
+  assert.ok(parsed.sections.Overview.startsWith(reference.sections.Overview), "Overview sits before the rule and must survive");
+  assert.equal(parsed.sections.API, reference.sections.API);
 });

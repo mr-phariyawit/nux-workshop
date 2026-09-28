@@ -94,8 +94,17 @@ export class CatalogError extends Error {
 // Front matter
 // ---------------------------------------------------------------------------
 
+const FRONT_MATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/;
+
+/** Everything after the closing `---` of the front matter. */
+export function stripFrontMatter(markdown: string, file: string): string {
+  const match = FRONT_MATTER.exec(markdown);
+  if (!match) throw new CatalogError(file, "missing YAML front matter");
+  return markdown.slice(match[0].length);
+}
+
 export function parseFrontMatter(markdown: string, file: string): Record<string, string> {
-  const match = /^---\r?\n([\s\S]*?)\r?\n---\r?\n/.exec(markdown);
+  const match = FRONT_MATTER.exec(markdown);
   if (!match) throw new CatalogError(file, "missing YAML front matter");
   const out: Record<string, string> = {};
   for (const raw of match[1].split(/\r?\n/)) {
@@ -181,7 +190,7 @@ export function parseComponentSpec(markdown: string, file: string): ComponentSpe
   if (!STATUSES.has(fm.status)) throw new CatalogError(file, `status "${fm.status}" is not draft|ready|deprecated`);
   if (!/^CMP-[a-z0-9-]+$/.test(fm.id)) throw new CatalogError(file, `id "${fm.id}" must match CMP-<kebab>`);
 
-  const body = markdown.slice(markdown.indexOf("\n---\n") + 5);
+  const body = stripFrontMatter(markdown, file);
   const sections = {} as Record<SpecSection, string>;
   const parts = body.split(/^## /m).slice(1); // drop the H1 preamble
   const found = new Map<string, string>();

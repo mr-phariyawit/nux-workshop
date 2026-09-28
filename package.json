@@ -7,7 +7,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "npm run test:unit && npm run test:e2e",
-    "test:unit": "node --import tsx --test tests/session-3/*.test.ts",
+    "test:unit": "node --import tsx --test tests/session-3/*.test.ts tests/repo/*.test.ts",
     "test:e2e": "node --import tsx --test tests/session-2/*.test.ts",
     "mcp:sitops": "tsx src/mcp/sitops-design-system/server.ts"
   },

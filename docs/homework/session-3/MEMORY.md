@@ -15,8 +15,9 @@
 | MEM-006 | `Done` requires at least one evidence photo (RULE-005, AC-SOPS-008). The button is disabled, not hidden, without one. | `UX.md` RULE-005; `A11Y.md` A11Y-014 | 2026-09-22 |
 | MEM-007 | Every status and priority colour is paired with an icon and a label; colour is never the only carrier. | `UX.md` RULE-006; `A11Y.md` A11Y-003 | 2026-09-22 |
 | MEM-008 | The design-system MCP server exposes read-only tools only. Writes go through PR. | `adr/ADR-001-remote-mcp-read-only.md`; `tests/session-3/server.test.ts` asserts `readOnlyHint` on every tool | 2026-09-22 |
-| MEM-010 | Badge text needs its own `--color-on-status-*` token per status. White on `green.500` is 3.5:1 and white on the old `amber.500` was 2.8:1; dark-theme fills are pale so the same fg token cannot serve both themes. | `tests/session-3/tools.test.ts` contrast cases; DESIGN.md changelog 1.2 | 2026-09-22 |
 | MEM-009 | The bearer token for remote MCP mode comes from `SITOPS_MCP_BEARER_TOKEN` in the environment. It is never in a file in this repo. | `src/mcp/sitops-design-system/server.ts` refuses to start HTTP mode without it | 2026-09-22 |
+| MEM-010 | Badge text needs its own `--color-on-status-*` token per status. White on `green.500` is 3.5:1 and white on the old `amber.500` was 2.8:1; dark-theme fills are pale so the same fg token cannot serve both themes. | `tests/session-3/tools.test.ts` contrast cases; DESIGN.md changelog 1.2 | 2026-09-22 |
+| MEM-011 | HTTP mode binds `127.0.0.1` by default; remote access needs `--host 0.0.0.0`. `/health` and `/info` are anonymous and carry no spec content. | `tests/session-3/server.test.ts` HTTP cases; ADR-001 amendment 1 | 2026-09-28 |
 
 ## Open (not yet facts)
 

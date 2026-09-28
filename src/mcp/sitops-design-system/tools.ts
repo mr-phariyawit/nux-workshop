@@ -221,10 +221,10 @@ function resolveColour(catalog: Catalog, theme: Theme, input: string): string | 
   if (input.startsWith("--")) {
     const token = catalog.tokens[theme].find((t) => t.name === input);
     if (!token) return { error: `unknown token "${input}" in ${theme} theme`, hint: "call get_design_tokens" };
-    if (!/^#[0-9a-f]{3,6}$/i.test(token.value)) return { error: `token "${input}" is not a colour (${token.value})` };
+    if (!/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(token.value)) return { error: `token "${input}" is not a colour (${token.value})` };
     return token.value;
   }
-  if (!/^#?[0-9a-f]{3}$|^#?[0-9a-f]{6}$/i.test(input)) return { error: `"${input}" is neither a --token nor a hex colour` };
+  if (!/^#?(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(input)) return { error: `"${input}" is neither a --token nor a hex colour` };
   return input.startsWith("#") ? input : `#${input}`;
 }
 
